@@ -1,27 +1,37 @@
 const express = require('express');
 const my_app = express();
 const { poolPromise } = require('./database_handler');
-// const usuariosRouter = require('./routers/usuarios');
+
+// Routers
+const usuariosRouter = require('./routers/usuarios');
+const productosRouter = require('./routers/productos');
+const estadosRouter = require('./routers/estados');
+const categoriasRouter = require('./routers/categoriaProductos');
+const ordenesRouter = require('./routers/ordenes_y_detalles');
 
 const port = 3000;
 
 my_app.get('/', (req, res) => {
-  res.send('Welcome to my Code Camp server! -　ようこそ');
+  res.send('Welcome to my Code Camp server.');
 });
 
-// Conexión con la base de datos
+// Prueba de conexión con la base de datos
 my_app.get('/test-connection', async (req, res) => {
     try {
         const pool = await poolPromise;
         res.send('Conexión a la base de datos exitosa');
     } catch (err) {
         res.status(500).send('Error al conectar a la base de datos');
-        //console.error(err);
+        console.error(err);
     }
 });
 
 
-//my_app.use('/usuarios', usuariosRouter);
+my_app.use('/usuarios', usuariosRouter);
+my_app.use('/productos', productosRouter);
+my_app.use('/estados', estadosRouter);
+my_app.use('/categoriaProductos', categoriasRouter);
+my_app.use('/ordenesYDetalles', ordenesRouter);
 
 // ------ Port
 // process.env.PORT: si es un puerto definido en el ambiente

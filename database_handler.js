@@ -1,34 +1,17 @@
 const sql = require('mssql');
 
-// const config = {
-//     server: 'localhost',           
-//     database: 'Base_OT', 
-//     options: {
-//         encrypt: true,             // Para conexiones cifradas
-//         trustServerCertificate: true // Confiar en certificados para desarrollo local
-//     },
-//     authentication: {
-//         type: 'ntlm',
-//         options: {
-//             domain: 'PERCYD',
-//             userName: 'PERCYD',
-//             password: '', // VACÍO POR AUTENTICACIÓN DE WINDOWS
-//         }
-//     }
-// };
-
 const config = {
-    server: 'localhost',           // El nombre del servidor o IP
-    database: 'Base_OT',           // Nombre de la base de datos
+    server: 'localhost',
+    database: 'Base_OT',
     options: {
-        encrypt: true,             // Para conexiones cifradas
-        trustServerCertificate: true // Confiar en certificados para desarrollo local
+        encrypt: true,             
+        trustServerCertificate: true 
     },
     authentication: {
-        type: 'default',           // Usa autenticación SQL Server
+        type: 'default', // Usa autenticación SQL Server
         options: {
-            userName: 'sqlUserP',   // El nombre del usuario creado
-            password: 'mynewpassword' // La contraseña que configuraste
+            userName: 'sqlUserP',
+            password: 'mynewpassword' 
         }
     }
 };
