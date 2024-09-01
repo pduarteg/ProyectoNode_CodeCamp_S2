@@ -1,6 +1,17 @@
 const express = require('express');
 const routerProductos = express.Router();
 const { sql, poolPromise } = require('../database_handler');
+const { verifyToken } = require('../controladores/generador_token')
+
+// Uso del bcrypt_handler (cifrado de contraseñas):
+const {encrypt, compare} = require('../bcrypt_handler');
+
+// Uso del middleware para autenticacion:
+const {revisar_autenticacion, autenticar_rol} = require('../middleware/autenticacion');
+
+// Permisos
+const permisos_de_roles = require('../dicc_roles');
+
 
 routerProductos.use(express.json());
 
@@ -15,8 +26,12 @@ routerProductos.get('/', async (req, res) => {
     }
 });
 
-routerProductos.post('/crearProducto', async (req, res) => {
-    const { categ, usuario, nombre, marca, codigo, stock, estado_id, precio } = req.body;
+routerProductos.post('/crearProducto', revisar_autenticacion, autenticar_rol([permisos_de_roles.Clientes]), async (req, res) => {
+    const { categ, nombre, marca, codigo, stock, precio } = req.body;
+
+    const token = req.headers.authorization.split(' ').pop();
+    const tokenData = await verifyToken(token);
+    const usuario = tokenData.id_usuario;
 
     try {
         const pool = await poolPromise;
@@ -28,7 +43,6 @@ routerProductos.post('/crearProducto', async (req, res) => {
             .input('marca', sql.VarChar(45), marca)
             .input('codigo', sql.VarChar(45), codigo)
             .input('stock', sql.Int, stock)
-            .input('estado_id_estado', sql.Int, estado_id)
             .input('precio', sql.Float, precio)
             .execute('SP_crear_producto');
 

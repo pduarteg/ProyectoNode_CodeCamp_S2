@@ -2,9 +2,15 @@ const express = require('express');
 const routerOrdenes = express.Router();
 const { sql, poolPromise } = require('../database_handler');
 
+// Uso del middleware para autenticacion:
+const {revisar_autenticacion, autenticar_rol} = require('../middleware/autenticacion');
+
+// Permisos
+const permisos_de_roles = require('../dicc_roles');
+
 routerOrdenes.use(express.json());
 
-routerOrdenes.get('/', async (req, res) => {
+routerOrdenes.get('/', revisar_autenticacion, autenticar_rol([permisos_de_roles.Operadores]), async (req, res) => {
     const query = `
         SELECT d.id_orden_detalles AS ID_Detalles, o.id_orden AS ID_Orden,
             o.usuario_id_usuario, o.estado_id_estado,
@@ -28,18 +34,20 @@ routerOrdenes.get('/', async (req, res) => {
 });
 
 routerOrdenes.post('/crearOrdenesYDetalles', async (req, res) => {
-    const { prod_id, cant, user_id, dir, fecha_e } = req.body;
+    const { user_id, dir, fecha_e, detalles } = req.body;
+
+    console.log("Estos son los detalles pasados:", JSON.stringify(detalles));
+
 
     try {
         const pool = await poolPromise;
 
         const result = await pool.request()
-            .input('producto_id_producto', sql.Int, prod_id)
-            .input('cantidad', sql.Int, cant)
             .input('usuario_id_usuario', sql.Int, user_id)
             .input('direccion', sql.VarChar(545), dir)
             .input('fecha_entrega', sql.Date, fecha_e)
-            .execute('SP_crear_orden_y_detalles');
+            .input('detallesJSON', sql.NVarChar, JSON.stringify(detalles))
+            .execute('SP_Orden_y_detalles_M');
 
         res.status(201).json({ message: 'Ordenes y Detalles creados con éxito.' });
     } catch (err) {

@@ -9,11 +9,20 @@ routerUsuarios.use(express.json());
 // Middleware: Esto se ejecuta después de recibir una solicitud
 // y antes de dar una respuesta.
 
-// Uso del autenticador:
-const {encrypt, compare} = require('../bcrypt_handler')
-// --------------------------------------------
+// Uso del bcrypt_handler (cifrado de contraseñas):
+const {encrypt, compare} = require('../bcrypt_handler');
 
-routerUsuarios.get('/', async (req, res) => {
+// Uso del middleware para autenticacion:
+const {revisar_autenticacion, autenticar_rol} = require('../middleware/autenticacion');
+
+// Permisos
+const permisos_de_roles = require('../dicc_roles');
+
+// -----------------------------------------------------------------------------------------------------
+
+
+// El identificador 2 para rol es un OPerador Administrativo
+routerUsuarios.get('/', revisar_autenticacion, autenticar_rol([permisos_de_roles.Operadores]), async (req, res) => {
     try {
         const pool = await poolPromise;
         const result = await pool.request().query('SELECT * FROM usuarios');
@@ -25,26 +34,16 @@ routerUsuarios.get('/', async (req, res) => {
 });
 
 routerUsuarios.post('/crearUsuario', async (req, res) => {
-    const { rol, estado, correo, nombre_completo, u_pass, tel, fecha_nacimiento } = req.body;
+    const { rol, correo, nombre_completo, u_pass, tel, fecha_nacimiento } = req.body;
 
     try {
         const pool = await poolPromise;
 
-        // Para el encriptado de la contrasenia (antiguo método)
-        // const numero_rondas = 10;
-        // Contrasenia hash
-        // const contrasenia_encriptada = await bcrypt.hash(u_pass, numero_rondas);
-        // console.log("Contraseña dada:")
-        // console.log(u_pass)
-        // console.log("Contraseña encriptada:")
-        // console.log(contrasenia_encriptada)
-
-        // Uso del 'bcrypt_handler.js' (nuevo método)
-        const contrasenia_encriptada = await encrypt(u_pass)
+        const contrasenia_encriptada = await encrypt(u_pass);
+        console.log("can I see this?");
 
         const result = await pool.request()
             .input('rol', sql.Int, rol)
-            .input('estado', sql.Int, estado)
             .input('correo', sql.VarChar(45), correo)
             .input('nombre_completo', sql.VarChar(60), nombre_completo)
             .input('u_pass', sql.VarChar(255), contrasenia_encriptada)
@@ -59,7 +58,7 @@ routerUsuarios.post('/crearUsuario', async (req, res) => {
     }
 });
 
-routerUsuarios.put('/actualizarUsuario/:id', async (req, res) => {
+routerUsuarios.put('/actualizarUsuario/:id', revisar_autenticacion, async (req, res) => {
     const { id } = req.params;
     const { rol, estado, correo, nombre_completo, u_pass, tel, fecha_nacimiento } = req.body;
 
