@@ -1,0 +1,130 @@
+// Para pruebas en POSTMAN:
+
+// Para crear usuario
+(POST)
+localhost:3000/usuarios/crearUsuario
+
+{
+	"rol": 1,
+	"correo": "usuario@prueba",
+	"nombre_completo": "Usuario Cliente Para Preubas",
+	"u_pass": "1010011010",
+	"tel": "1111100111",
+	"fecha_nacimiento": "1999-12-31"
+}
+
+// Para actualizar usuario:
+localhost:3000/usuarios/actualizarUsuario/17
+{
+	"rol": 1,
+    "estado": 1,
+	"correo": "usuario@prueba",
+	"nombre_completo": "prueba nueva",
+	"u_pass": "0000",
+	"tel": "111",
+	"fecha_nacimiento": "2999-12-31"
+}
+
+// ---------------------------------------------------------------
+LOGIN (POST)
+localhost:3000/login/user_login
+
+// Para login: (Operador)
+{
+    "correo": "admin@admin",
+    "password": "0000"
+}
+
+// Para login: (cliente)
+
+{
+    "correo": "usuario@prueba",
+    "password": "1010011010"
+}
+
+// ---------------------------------------------------------------
+// Para crear producto (debe ser Cliente)
+
+(POST)
+localhost:3000/productos/crearProducto
+
+{
+    "categ": 7,
+    "nombre": "INVENTO",
+    "marca": "nueva nueva",
+    "codigo": "0101010",
+    "stock": 3,
+    "precio": 3.5
+}
+// ---------------------------------------------------------------
+// Para actualizar producto (debe ser Cliente)
+(PUT)
+localhost:3000/productos/actualizarProducto/17
+{
+    "categ": 7,
+    "nombre": "INVENTO",
+    "marca": "nueva nueva",
+    "codigo": "0101010",
+    "stock": 3,
+    "precio": 3.5,
+    "foto": null,
+    "foto_url": "URL_DE_LA_FOTO"
+}
+
+// Para crear ordenes y detalles (debe ser Operador)
+(POST)
+localhost:3000/ordenesYDetalles/crearOrdenesYDetalles
+
+{
+    "user_id": 14,
+    "dir": "Dirección de Postman",
+    "fecha_e": "2025-02-01",
+    "detalles": [
+                    {
+                        "id_producto": 1,
+                        "cantidad": 2
+                    },
+                    {
+                        "id_producto": 2,
+                        "cantidad": 3
+                    }
+                ]
+}
+
+
+
+// Para actualizar ordenes
+(PUT)
+localhost:3000/ordenesYDetalles/actualizarOrdenesYDetalles/3
+{
+    "dir": "direccion actualizada por operador",
+    "tel": "tel actualizado",
+    "correo_electronico": "correo actualizado",
+    "fecha_entrega": "1990-01-09"
+}
+
+
+// Para crear categoria (cualquiera)
+(POST)
+localhost:3000/categoriaProductos/crearCategoria
+{
+	"nombre": "nueva categoria"
+}
+// Para actualizar categorias
+(PUT)
+
+localhost:3000/categoriaProductos/actualizarCategoria/3
+{
+    "nombre": "actualizando la 3 ?",
+    "estado_id_estado": 7
+}
+
+
+// Para crear estados (operadores)
+localhost:3000/estados/crearEstado
+{
+    "nombre": "nuevo estado"
+}
+
+// Para actualizar estado
+localhost:3000/estados/actualizarEstado/10

@@ -1,10 +1,17 @@
 const express = require('express');
 const routerEstados = express.Router();
 const { sql, poolPromise } = require('../database_handler');
+const { verifyToken } = require('../controladores/generador_token')
 
 routerEstados.use(express.json());
 
-routerEstados.get('/', async (req, res) => {
+// Uso del middleware para autenticacion:
+const {revisar_autenticacion, autenticar_rol} = require('../middleware/autenticacion');
+
+// Permisos
+const permisos_de_roles = require('../dicc_roles');
+
+routerEstados.get('/', revisar_autenticacion, autenticar_rol([permisos_de_roles.Operadores]), async (req, res) => {
     try {
         const pool = await poolPromise;
         const result = await pool.request().query('SELECT * FROM estados');
@@ -15,7 +22,7 @@ routerEstados.get('/', async (req, res) => {
     }
 });
 
-routerEstados.post('/crearEstado', async (req, res) => {
+routerEstados.post('/crearEstado', revisar_autenticacion, autenticar_rol([permisos_de_roles.Operadores]), async (req, res) => {
     const { nombre } = req.body;
 
     try {
@@ -32,7 +39,7 @@ routerEstados.post('/crearEstado', async (req, res) => {
     }
 });
 
-routerEstados.put('/actualizarEstado/:id', async (req, res) => {
+routerEstados.put('/actualizarEstado/:id', revisar_autenticacion, autenticar_rol([permisos_de_roles.Operadores]), async (req, res) => {
     const { id } = req.params;
     const { nombre } = req.body;
 

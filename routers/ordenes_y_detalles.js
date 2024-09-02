@@ -33,11 +33,10 @@ routerOrdenes.get('/', revisar_autenticacion, autenticar_rol([permisos_de_roles.
     }
 });
 
-routerOrdenes.post('/crearOrdenesYDetalles', async (req, res) => {
+routerOrdenes.post('/crearOrdenesYDetalles', revisar_autenticacion, autenticar_rol([permisos_de_roles.Operadores]), async (req, res) => {
     const { user_id, dir, fecha_e, detalles } = req.body;
 
     console.log("Estos son los detalles pasados:", JSON.stringify(detalles));
-
 
     try {
         const pool = await poolPromise;
@@ -58,15 +57,16 @@ routerOrdenes.post('/crearOrdenesYDetalles', async (req, res) => {
 
 
 // Se pasa el ID de los detalles y no de la orden.
-routerOrdenes.put('/actualizarOrdenesYDetalles/:id', async (req, res) => {
-    const { id } = req.params;
+routerOrdenes.put('/actualizarOrdenesYDetalles/:id', revisar_autenticacion, autenticar_rol([permisos_de_roles.Operadores]), async (req, res) => {
+    const { id } = req.params; // DE LA ORDEN
     const { dir, tel, correo_electronico, fecha_entrega } = req.body;
 
     try {
         const pool = await poolPromise;
+        console.log("Correo: ", correo_electronico);
 
         const result = await pool.request()
-            .input('id_orden_detalles', sql.Int, id)
+            .input('id_orden', sql.Int, id)
             .input('dir', sql.VarChar(545), dir)
             .input('tel', sql.VarChar(45), tel)
             .input('correo_electronico', sql.VarChar(45), correo_electronico)

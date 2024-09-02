@@ -1,6 +1,7 @@
 const express = require('express');
 const routerUsuarios = express.Router();
 const { sql, poolPromise } = require('../database_handler');
+const { verifyToken } = require('../controladores/generador_token')
 
 // Para encriptar contraseñas
 const bcrypt = require('bcrypt');
@@ -40,7 +41,6 @@ routerUsuarios.post('/crearUsuario', async (req, res) => {
         const pool = await poolPromise;
 
         const contrasenia_encriptada = await encrypt(u_pass);
-        console.log("can I see this?");
 
         const result = await pool.request()
             .input('rol', sql.Int, rol)
@@ -59,27 +59,34 @@ routerUsuarios.post('/crearUsuario', async (req, res) => {
 });
 
 routerUsuarios.put('/actualizarUsuario/:id', revisar_autenticacion, async (req, res) => {
-    const { id } = req.params;
+    const { id } = req.params; // ID que se quiere actualizar
     const { rol, estado, correo, nombre_completo, u_pass, tel, fecha_nacimiento } = req.body;
 
+    const token = req.headers.authorization.split(' ').pop();
+    const tokenData = await verifyToken(token);
+    const usuario = tokenData.id_usuario; // ID del usuario logeado
+
     try {
-        const pool = await poolPromise;
+        if(usuario == id){
+            const numero_rondas = 10;
+            const contrasenia_encriptada = await bcrypt.hash(u_pass, numero_rondas);
 
-        const numero_rondas = 10;
-        const contrasenia_encriptada = await bcrypt.hash(u_pass, numero_rondas);
-        
-        const result = await pool.request()
-            .input('id_usuario', sql.Int, id)
-            .input('rol_id_rol', sql.Int, rol)
-            .input('estado_id_estados', sql.Int, estado)
-            .input('correo_electronico', sql.VarChar(45), correo)
-            .input('nombre_completo', sql.VarChar(60), nombre_completo)
-            .input('user_password', sql.VarChar(255), contrasenia_encriptada)
-            .input('telefono', sql.VarChar(45), tel)
-            .input('fecha_nacimiento', sql.Date, fecha_nacimiento)
-            .execute('SP_modificar_usuario');
+            const pool = await poolPromise;
+            const result = await pool.request()
+                .input('id_usuario', sql.Int, id)
+                .input('rol_id_rol', sql.Int, rol)
+                .input('estado_id_estados', sql.Int, estado)
+                .input('correo_electronico', sql.VarChar(45), correo)
+                .input('nombre_completo', sql.VarChar(60), nombre_completo)
+                .input('user_password', sql.VarChar(255), contrasenia_encriptada)
+                .input('telefono', sql.VarChar(45), tel)
+                .input('fecha_nacimiento', sql.Date, fecha_nacimiento)
+                .execute('SP_modificar_usuario');
 
-        res.status(200).json({ message: 'Usuario actualizado con éxito.' });
+            res.status(200).json({ message: 'Usuario actualizado con éxito.' });
+        } else {
+            res.status(409).json({ message: 'No puedes actualizar este perfil.' });
+        }
     } catch (err) {
         res.status(500).send('Error al actualizar el usuario');
         console.error('Error en PUT /usuarios/actualizarUsuario:', err);
