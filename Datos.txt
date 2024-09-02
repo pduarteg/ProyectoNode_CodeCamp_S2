@@ -1,0 +1,5 @@
+Nombre: Percy Juventino Duarte Gálvez
+Correo: duarte.galvez13@gmail.com
+Teléfono: 3608-9775
+
+Link del repositorio: https://github.com/pduarteg/ProyectoNode_CodeCamp_S2
